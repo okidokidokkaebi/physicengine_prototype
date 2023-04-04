@@ -1,4 +1,4 @@
-use glium::glutin;
+use glium::{glutin, Surface};
 
 fn main() {
     let event_loop = glutin::event_loop::EventLoop::new();
@@ -6,10 +6,15 @@ fn main() {
         .with_title("Title")
         .with_resizable(false)
         .with_inner_size(glutin::dpi::LogicalSize::new(1024, 576));
-    let _context = glutin::ContextBuilder::new()
-        .build_windowed(window_builder, &event_loop).unwrap();
+    let context = glutin::ContextBuilder::new();
+    let display = glium::Display::new(window_builder, context, &event_loop).unwrap();
 
     event_loop.run(move |ev, _, control_flow| {
+
+        let mut target = display.draw();
+        target.clear_color(0.0, 0.0, 0.0, 1.0);
+        target.finish().unwrap();
+
         let next_frame_time = std::time::Instant::now() +
             std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
