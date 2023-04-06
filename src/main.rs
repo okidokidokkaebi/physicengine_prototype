@@ -1,6 +1,6 @@
 mod model;
 
-use glium::{glutin, Surface, Display, implement_vertex, VertexBuffer, IndexBuffer};
+use glium::{glutin, Surface, Display, implement_vertex, VertexBuffer, IndexBuffer, uniform};
 use model::vertex::Vert3D;
 use russimp::scene::Scene;
 
@@ -14,23 +14,31 @@ fn main() {
 
     implement_vertex!(Vert3D, position, normal);
 
-    // TODO: load file
-    let input = Scene::from_file("res\\cube.obj", vec![]).unwrap();
+    // load file
+    let input = Scene::from_file("res\\torus.obj", vec![]).unwrap();
 
-    // TODO: extract data
+    // extract data
     let (vertices, indices): (Vec<Vert3D>, Vec<u32>) = Vert3D::from_scene(input);
     let v_buffer = VertexBuffer::new(&display, &vertices).unwrap();
     let i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
 
-    // TODO: create glsl program
+    // create glsl program
+    let vs = std::fs::read_to_string("src\\shader\\simple_vertex.glsl").unwrap();
+    let fs = std::fs::read_to_string("src\\shader\\simple_fragment.glsl").unwrap();
+
+    let program = glium::Program::from_source(&display, &vs, &fs, None).unwrap();
+
 
     event_loop.run(move |ev, _, control_flow| {
 
         let mut target = display.draw();
         target.clear_color(0.1, 0.05, 0.1, 1.0);
 
-        // TODO: draw
-        // target.draw(&v_buffer, &i_buffer, program, uniforms, draw_parameters)
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+        target.draw(&v_buffer, &i_buffer, &program, &uniform! {}, &Default::default()).unwrap();
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
         target.finish().unwrap();
 
