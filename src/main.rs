@@ -1,6 +1,6 @@
 mod model;
 
-use glium::{glutin, Surface, implement_vertex};
+use glium::{glutin, Surface, implement_vertex, VertexBuffer, IndexBuffer};
 use model::vertex::Vert3D;
 use russimp::scene::Scene;
 
@@ -18,6 +18,9 @@ fn main() {
     let input = Scene::from_file("res\\cube.obj", vec![]).unwrap();
 
     // TODO: extract data
+    let (vertices, indices): (Vec<Vert3D>, Vec<u32>) = Vert3D::from_scene(input);
+    let v_buffer = glium::VertexBuffer::new(&display, &vertices).unwrap();
+    let i_buffer = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
 
     // TODO: create glsl program
 
@@ -27,6 +30,7 @@ fn main() {
         target.clear_color(0.1, 0.05, 0.1, 1.0);
 
         // TODO: draw
+        // target.draw(&v_buffer, &i_buffer, program, uniforms, draw_parameters)
 
         target.finish().unwrap();
 
