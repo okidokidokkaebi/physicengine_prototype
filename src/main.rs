@@ -1,6 +1,6 @@
 mod model;
 
-use glium::{glutin, Surface, implement_vertex, VertexBuffer, IndexBuffer};
+use glium::{glutin, Surface, Display, implement_vertex, VertexBuffer, IndexBuffer};
 use model::vertex::Vert3D;
 use russimp::scene::Scene;
 
@@ -10,7 +10,7 @@ fn main() {
     let window_builder = glutin::window::WindowBuilder::new().with_title("Title").with_resizable(false)
         .with_inner_size(glutin::dpi::LogicalSize::new(1024, 576));
     let context = glutin::ContextBuilder::new();
-    let display = glium::Display::new(window_builder, context, &event_loop).unwrap();
+    let display = Display::new(window_builder, context, &event_loop).unwrap();
 
     implement_vertex!(Vert3D, position, normal);
 
@@ -19,8 +19,8 @@ fn main() {
 
     // TODO: extract data
     let (vertices, indices): (Vec<Vert3D>, Vec<u32>) = Vert3D::from_scene(input);
-    let v_buffer = glium::VertexBuffer::new(&display, &vertices).unwrap();
-    let i_buffer = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
+    let v_buffer = VertexBuffer::new(&display, &vertices).unwrap();
+    let i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
 
     // TODO: create glsl program
 
