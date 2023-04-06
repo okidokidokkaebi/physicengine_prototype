@@ -2,6 +2,7 @@ mod model;
 
 use glium::{glutin, Surface, implement_vertex};
 use model::vertex::Vert3D;
+use russimp::scene::Scene;
 
 fn main() {
     // Window and context creation
@@ -14,6 +15,7 @@ fn main() {
     implement_vertex!(Vert3D, position, normal);
 
     // TODO: load file
+    let input = Scene::from_file("res\\cube.obj", vec![]).unwrap();
 
     // TODO: extract data
 
