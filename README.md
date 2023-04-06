@@ -1,7 +1,7 @@
 # Physics Engine Prototype
 
 Goals: 
-- import of .obj (wavefront) files
+- ~~import of .obj (wavefront) files~~
 - camera movement
 - orthographic and perspective projection
 - object movement
