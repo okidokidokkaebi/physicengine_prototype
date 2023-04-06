@@ -1,4 +1,8 @@
-use glium::{glutin, Surface};
+mod model;
+
+use glium::{glutin, Surface, Display, implement_vertex, VertexBuffer, IndexBuffer, uniform};
+use model::vertex::Vert3D;
+use russimp::scene::Scene;
 
 fn main() {
     // Window and context creation
@@ -6,20 +10,35 @@ fn main() {
     let window_builder = glutin::window::WindowBuilder::new().with_title("Title").with_resizable(false)
         .with_inner_size(glutin::dpi::LogicalSize::new(1024, 576));
     let context = glutin::ContextBuilder::new();
-    let display = glium::Display::new(window_builder, context, &event_loop).unwrap();
+    let display = Display::new(window_builder, context, &event_loop).unwrap();
 
-    // TODO: load file
+    implement_vertex!(Vert3D, position, normal);
 
-    // TODO: extract data
+    // load file
+    let input = Scene::from_file("res\\torus.obj", vec![]).unwrap();
 
-    // TODO: create glsl program
+    // extract data
+    let (vertices, indices): (Vec<Vert3D>, Vec<u32>) = Vert3D::from_scene(input);
+    let v_buffer = VertexBuffer::new(&display, &vertices).unwrap();
+    let i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
+
+    // create glsl program
+    let vs = std::fs::read_to_string("src\\shader\\simple_vertex.glsl").unwrap();
+    let fs = std::fs::read_to_string("src\\shader\\simple_fragment.glsl").unwrap();
+
+    let program = glium::Program::from_source(&display, &vs, &fs, None).unwrap();
+
 
     event_loop.run(move |ev, _, control_flow| {
 
         let mut target = display.draw();
         target.clear_color(0.1, 0.05, 0.1, 1.0);
 
-        // TODO: draw
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+        target.draw(&v_buffer, &i_buffer, &program, &uniform! {}, &Default::default()).unwrap();
+        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
         target.finish().unwrap();
 
