@@ -1,3 +1,5 @@
+use std::iter;
+
 use russimp::scene::Scene;
 
 #[derive(Clone, Copy, Debug)]
@@ -17,8 +19,9 @@ impl Vert3D {
 
             assert!(vertex_list.len() == normal_list.len(), "ASSERTION : Amount of vertices must be the same as the amount of vertex normals!");
 
-            let _ = vertex_list.iter().zip(normal_list)
-            .map(|(v, n)| vertices.push( Vert3D { position: [v.x, v.y, v.z], normal: [n.x, n.y, n.z] }));
+            for (v, n) in iter::zip(vertex_list, normal_list) {
+                vertices.push(Vert3D { position: [v.x, v.y, v.z], normal: [n.x, n.y, n.z] })
+            }
 
             for face in mesh.faces {
                 indices.push(face.0);
