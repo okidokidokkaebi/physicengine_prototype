@@ -1,4 +1,7 @@
-use glium::{glutin, Surface};
+mod model;
+
+use glium::{glutin, Surface, implement_vertex};
+use model::vertex::Vert3D;
 
 fn main() {
     // Window and context creation
@@ -7,6 +10,8 @@ fn main() {
         .with_inner_size(glutin::dpi::LogicalSize::new(1024, 576));
     let context = glutin::ContextBuilder::new();
     let display = glium::Display::new(window_builder, context, &event_loop).unwrap();
+
+    implement_vertex!(Vert3D, position, normal);
 
     // TODO: load file
 
