@@ -17,7 +17,7 @@ fn main() {
     implement_vertex!(Vert3D, position, normal);
 
     // load file
-    let input = Scene::from_file("res\\torus.obj", vec![]).unwrap();
+    let input = Scene::from_file("res\\donut.obj", vec![]).unwrap();
 
     // extract data
     let (vertices, indices): (Vec<Vert3D>, Vec<u32>) = Vert3D::from_scene(input);
@@ -33,11 +33,10 @@ fn main() {
     // uniforms and constants
     let movement = 0.05f32;
     let mut pos = [0.0, 1.0, 1.0];
-    let dir = [0.0, -1.0, -1.0];
+    let mut dir = [0.0, -1.0, -1.0];
     let up = [0.0, 1.0, 0.0];
 
     let model = Mat4D::new().scale([0.5, 0.5, 0.5]);
-    println!("Model :\n{:?}", model.content);
 
     // projection code from : https://github.com/glium/glium/blob/master/book/tuto-10-perspective.md
     let projection = {
@@ -55,8 +54,6 @@ fn main() {
             [         0.0         ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
         ]
     };
-    println!("Projection :\n{:?}", projection);
-
 
     event_loop.run(move |ev, _, control_flow| {
 
@@ -83,7 +80,6 @@ fn main() {
 
         target.finish().unwrap();
 
-        // TODO: add camera control
         let next_frame_time = std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
         match ev {
@@ -98,6 +94,7 @@ fn main() {
                 glium::glutin::event::DeviceEvent::Key(
                     glutin::event::KeyboardInput { scancode: _, state: _, virtual_keycode, modifiers: _ }) => {
                         match virtual_keycode {
+                            // camera control 
                             Some(VirtualKeyCode::A) => pos[0] += &movement,
                             Some(VirtualKeyCode::D) => pos[0] -= &movement,
                             Some(VirtualKeyCode::S) => pos[1] -= &movement,
@@ -106,14 +103,14 @@ fn main() {
                             Some(VirtualKeyCode::F) => pos[2] -= &movement,
                             Some(VirtualKeyCode::C) => pos[2] += &movement,
 
-                            Some(VirtualKeyCode::J) => (),
-                            Some(VirtualKeyCode::L) => (),
-                            Some(VirtualKeyCode::K) => (),
-                            Some(VirtualKeyCode::I) => (),
+                            Some(VirtualKeyCode::J) => dir[0] += &movement,
+                            Some(VirtualKeyCode::L) => dir[0] -= &movement,
+                            Some(VirtualKeyCode::K) => dir[1] -= &movement,
+                            Some(VirtualKeyCode::I) => dir[1] += &movement,
 
                             Some(VirtualKeyCode::Key0) => {
                                 pos = [0.0, 1.0, 1.0];
-                                println!("View :\n{:?}", view.content);
+                                dir = [0.0, -1.0, -1.0];
                             },
                             _ => return,
                         }
