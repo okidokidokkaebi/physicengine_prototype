@@ -17,7 +17,7 @@ fn main() {
     implement_vertex!(Vert3D, position, normal);
 
     // load file
-    let input = Scene::from_file("res\\cube.obj", vec![]).unwrap();
+    let input = Scene::from_file("res\\torus.obj", vec![]).unwrap();
 
     // extract data
     let (vertices, indices): (Vec<Vert3D>, Vec<u32>) = Vert3D::from_scene(input);
@@ -37,6 +37,7 @@ fn main() {
     let up = [0.0, 1.0, 0.0];
 
     let model = Mat4D::new().scale([0.5, 0.5, 0.5]);
+    println!("Model :\n{:?}", model.content);
 
     // projection code from : https://github.com/glium/glium/blob/master/book/tuto-10-perspective.md
     let projection = {
@@ -48,24 +49,35 @@ fn main() {
     
         let f = 1.0 / (fov / 2.0).tan();
         [
-            [f *   aspect_ratio   ,    0.0,              0.0              ,   0.0],
+            [f *  aspect_ratio   ,    0.0,              0.0              ,   0.0],
             [         0.0         ,     f ,              0.0              ,   0.0],
             [         0.0         ,    0.0,  (zfar+znear)/(zfar-znear)    ,   1.0],
             [         0.0         ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
         ]
     };
+    println!("Projection :\n{:?}", projection);
+
 
     event_loop.run(move |ev, _, control_flow| {
 
         let mut target = display.draw();
         target.clear_color(0.1, 0.05, 0.1, 1.0);
+        target.clear_depth(1.0);
+
         let view = Mat4D::view_matrix(&pos , &dir, &up);
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
         target.draw(&v_buffer, &i_buffer, &program, 
             &uniform! {model : model.content, view : view.content, projection : projection, camera_position : pos},
-            &Default::default()).unwrap();
+            &glium::DrawParameters {
+                depth: glium::Depth {
+                    test: glium::DepthTest::IfLess,
+                    write: true,
+                    .. Default::default()
+                },
+                .. Default::default()
+            }).unwrap();
         
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -101,7 +113,7 @@ fn main() {
 
                             Some(VirtualKeyCode::Key0) => {
                                 pos = [0.0, 1.0, 1.0];
-                                println!("Reset");
+                                println!("View :\n{:?}", view.content);
                             },
                             _ => return,
                         }
