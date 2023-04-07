@@ -20,14 +20,16 @@ impl Vert3D {
             assert!(vertex_list.len() == normal_list.len(), "ASSERTION : Amount of vertices must be the same as the amount of vertex normals!");
 
             for (v, n) in iter::zip(vertex_list, normal_list) {
-                vertices.push(Vert3D { position: [v.x, v.y, v.z], normal: [n.x, n.y, n.z] })
+                vertices.push(Vert3D { position: [v.x, v.y, v.z], normal: [n.x, n.y, n.z] });
+                println!("{:?}", vertices.last());
             }
 
             for face in mesh.faces {
                 indices.push(face.0);
+                println!("{:?}", indices.last().get_or_insert(&Vec::new()));
             }
         }
-
+        println!("vertices length : {}\tindices length : {}", vertices.len(), indices.len());
         return (vertices, indices.concat());
     }
 }
