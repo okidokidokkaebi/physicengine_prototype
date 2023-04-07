@@ -21,15 +21,12 @@ impl Vert3D {
 
             for (v, n) in iter::zip(vertex_list, normal_list) {
                 vertices.push(Vert3D { position: [v.x, v.y, v.z], normal: [n.x, n.y, n.z] });
-                println!("{:?}", vertices.last());
             }
 
             for face in mesh.faces {
                 indices.push(face.0);
-                println!("{:?}", indices.last().get_or_insert(&Vec::new()));
             }
         }
-        println!("vertices length : {}\tindices length : {}", vertices.len(), indices.len());
         return (vertices, indices.concat());
     }
 
