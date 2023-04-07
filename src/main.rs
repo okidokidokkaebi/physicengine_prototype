@@ -4,6 +4,8 @@ use glium::{glutin::{self, event::VirtualKeyCode}, Surface, Display, implement_v
 use model::vertex::Vert3D;
 use russimp::scene::Scene;
 
+use crate::model::mvp::Mat4D;
+
 fn main() {
     // Window and context creation
     let event_loop = glutin::event_loop::EventLoop::new();
@@ -28,6 +30,11 @@ fn main() {
 
     let program = glium::Program::from_source(&display, &vs, &fs, None).unwrap();
 
+    // uniforms and constants
+    let movement = 0.1f32;
+
+    let mut model = Mat4D::new();
+    let mut view = Mat4D::new();
 
     event_loop.run(move |ev, _, control_flow| {
 
@@ -36,7 +43,7 @@ fn main() {
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-        target.draw(&v_buffer, &i_buffer, &program, &uniform! {}, &Default::default()).unwrap();
+        target.draw(&v_buffer, &i_buffer, &program, &uniform! {model : model.content, view : view.content}, &Default::default()).unwrap();
         
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -57,17 +64,23 @@ fn main() {
                 glium::glutin::event::DeviceEvent::Key(
                     glutin::event::KeyboardInput { scancode: _, state: _, virtual_keycode, modifiers: _ }) => {
                         match virtual_keycode {
-                            Some(VirtualKeyCode::A) => (),
-                            Some(VirtualKeyCode::D) => (),
-                            Some(VirtualKeyCode::S) => (),
-                            Some(VirtualKeyCode::W) => (),
+                            Some(VirtualKeyCode::A) => view = view.trans([-movement, 0.0, 0.0]),
+                            Some(VirtualKeyCode::D) => view = view.trans([ movement, 0.0, 0.0]),
+                            Some(VirtualKeyCode::S) => view = view.trans([0.0,  movement, 0.0]),
+                            Some(VirtualKeyCode::W) => view = view.trans([0.0, -movement, 0.0]),
+
+                            Some(VirtualKeyCode::F) => view = view.trans([0.0, 0.0,  movement]),
+                            Some(VirtualKeyCode::C) => view = view.trans([0.0, 0.0, -movement]),
 
                             Some(VirtualKeyCode::J) => (),
                             Some(VirtualKeyCode::L) => (),
                             Some(VirtualKeyCode::K) => (),
                             Some(VirtualKeyCode::I) => (),
 
-                            Some(VirtualKeyCode::Key0) => (),
+                            Some(VirtualKeyCode::Key0) => {
+                                view = Mat4D::new();
+                                println!("Reset");
+                            },
                             _ => return,
                         }
                 }
