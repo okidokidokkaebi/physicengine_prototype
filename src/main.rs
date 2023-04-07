@@ -31,19 +31,42 @@ fn main() {
     let program = glium::Program::from_source(&display, &vs, &fs, None).unwrap();
 
     // uniforms and constants
-    let movement = 0.1f32;
+    let movement = 0.05f32;
+    let mut pos = [0.0, 1.0, 1.0];
+    let dir = [0.0, -1.0, -1.0];
+    let up = [0.0, 1.0, 0.0];
 
-    let mut model = Mat4D::new();
-    let mut view = Mat4D::new();
+    let model = Mat4D::new().scale([0.5, 0.5, 0.5]);
+    println!("{:?}", model);
+
+    // projection code from : https://github.com/glium/glium/blob/master/book/tuto-10-perspective.md
+    let projection = {
+        let (width, height) = display.get_framebuffer_dimensions();
+        let aspect_ratio = height as f32 / width as f32;
+        let fov: f32 = 3.141592 / 3.0;
+        let zfar = 1024.0;
+        let znear = 0.1;
+    
+        let f = 1.0 / (fov / 2.0).tan();
+        [
+            [f *   aspect_ratio   ,    0.0,              0.0              ,   0.0],
+            [         0.0         ,     f ,              0.0              ,   0.0],
+            [         0.0         ,    0.0,  (zfar+znear)/(zfar-znear)    ,   1.0],
+            [         0.0         ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
+        ]
+    };
 
     event_loop.run(move |ev, _, control_flow| {
 
         let mut target = display.draw();
         target.clear_color(0.1, 0.05, 0.1, 1.0);
+        let mut view = Mat4D::view_matrix(&pos , &dir, &up);
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-        target.draw(&v_buffer, &i_buffer, &program, &uniform! {model : model.content, view : view.content}, &Default::default()).unwrap();
+        target.draw(&v_buffer, &i_buffer, &program, 
+            &uniform! {model : model.content, view : view.content, projection : projection},
+            &Default::default()).unwrap();
         
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
@@ -64,13 +87,13 @@ fn main() {
                 glium::glutin::event::DeviceEvent::Key(
                     glutin::event::KeyboardInput { scancode: _, state: _, virtual_keycode, modifiers: _ }) => {
                         match virtual_keycode {
-                            Some(VirtualKeyCode::A) => view = view.trans([-movement, 0.0, 0.0]),
-                            Some(VirtualKeyCode::D) => view = view.trans([ movement, 0.0, 0.0]),
-                            Some(VirtualKeyCode::S) => view = view.trans([0.0,  movement, 0.0]),
-                            Some(VirtualKeyCode::W) => view = view.trans([0.0, -movement, 0.0]),
+                            Some(VirtualKeyCode::A) => pos[0] += &movement,
+                            Some(VirtualKeyCode::D) => pos[0] -= &movement,
+                            Some(VirtualKeyCode::S) => pos[1] -= &movement,
+                            Some(VirtualKeyCode::W) => pos[1] += &movement,
 
-                            Some(VirtualKeyCode::F) => view = view.trans([0.0, 0.0,  movement]),
-                            Some(VirtualKeyCode::C) => view = view.trans([0.0, 0.0, -movement]),
+                            Some(VirtualKeyCode::F) => pos[2] -= &movement,
+                            Some(VirtualKeyCode::C) => pos[2] += &movement,
 
                             Some(VirtualKeyCode::J) => (),
                             Some(VirtualKeyCode::L) => (),
@@ -78,7 +101,7 @@ fn main() {
                             Some(VirtualKeyCode::I) => (),
 
                             Some(VirtualKeyCode::Key0) => {
-                                view = Mat4D::new();
+                                pos = [0.0, 1.0, 1.0];
                                 println!("Reset");
                             },
                             _ => return,
