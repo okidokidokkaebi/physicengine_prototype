@@ -17,7 +17,7 @@ fn main() {
     implement_vertex!(Vert3D, position, normal);
 
     // load file
-    let input = Scene::from_file("res\\torus.obj", vec![]).unwrap();
+    let input = Scene::from_file("res\\cube.obj", vec![]).unwrap();
 
     // extract data
     let (vertices, indices): (Vec<Vert3D>, Vec<u32>) = Vert3D::from_scene(input);
@@ -37,7 +37,6 @@ fn main() {
     let up = [0.0, 1.0, 0.0];
 
     let model = Mat4D::new().scale([0.5, 0.5, 0.5]);
-    println!("{:?}", model);
 
     // projection code from : https://github.com/glium/glium/blob/master/book/tuto-10-perspective.md
     let projection = {
@@ -60,12 +59,12 @@ fn main() {
 
         let mut target = display.draw();
         target.clear_color(0.1, 0.05, 0.1, 1.0);
-        let mut view = Mat4D::view_matrix(&pos , &dir, &up);
+        let view = Mat4D::view_matrix(&pos , &dir, &up);
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
         target.draw(&v_buffer, &i_buffer, &program, 
-            &uniform! {model : model.content, view : view.content, projection : projection},
+            &uniform! {model : model.content, view : view.content, projection : projection, camera_position : pos},
             &Default::default()).unwrap();
         
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
