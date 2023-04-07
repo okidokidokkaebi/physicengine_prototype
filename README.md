@@ -2,7 +2,7 @@
 
 Goals: 
 - ~~import of .obj (wavefront) files~~
-- camera movement
+- ~~camera movement~~
 - orthographic and perspective projection
 - object movement
 - collision detection
