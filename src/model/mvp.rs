@@ -70,13 +70,13 @@ impl Mat4D {
 
     fn mult4_d(left : Mat4D, right : Mat4D) -> Mat4D {
         let mut result = Mat4D::new();
-        for j in 0..4 {
-            for i in 0..4 {
+        for i in 0..4 {
+            for j in 0..4 {
                 let mut component = 0.0;
                 for k in 0..4 {
-                    component += left.content[j][k] * right.content[k][i];
+                    component += left.content[i][k] * right.content[k][j];
                 }
-                result.content[j][i] = component;
+                result.content[i][j] = component;
             }
         }
         return result;
