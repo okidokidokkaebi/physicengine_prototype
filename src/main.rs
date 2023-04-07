@@ -1,6 +1,6 @@
 mod model;
 
-use glium::{glutin, Surface, Display, implement_vertex, VertexBuffer, IndexBuffer, uniform};
+use glium::{glutin::{self, event::VirtualKeyCode}, Surface, Display, implement_vertex, VertexBuffer, IndexBuffer, uniform};
 use model::vertex::Vert3D;
 use russimp::scene::Scene;
 
@@ -53,6 +53,26 @@ fn main() {
                 },
                 _ => return,
             },
+            glutin::event::Event::DeviceEvent {event, ..} => match event {
+                glium::glutin::event::DeviceEvent::Key(
+                    glutin::event::KeyboardInput { scancode: _, state: _, virtual_keycode, modifiers: _ }) => {
+                        match virtual_keycode {
+                            Some(VirtualKeyCode::A) => (),
+                            Some(VirtualKeyCode::D) => (),
+                            Some(VirtualKeyCode::S) => (),
+                            Some(VirtualKeyCode::W) => (),
+
+                            Some(VirtualKeyCode::J) => (),
+                            Some(VirtualKeyCode::L) => (),
+                            Some(VirtualKeyCode::K) => (),
+                            Some(VirtualKeyCode::I) => (),
+
+                            Some(VirtualKeyCode::Key0) => (),
+                            _ => return,
+                        }
+                }
+                _ => return,
+            }
             _ => (),
         }
     });
