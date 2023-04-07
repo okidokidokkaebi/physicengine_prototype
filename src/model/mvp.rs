@@ -60,10 +60,10 @@ impl Mat4D {
 
     pub fn trans(self, vector : [f32; 3]) -> Mat4D {
         let translate_mat = Mat4D { content : [
-            [1.0, 0.0, 0.0, vector[0]],
-            [0.0, 1.0, 0.0, vector[1]],
-            [0.0, 0.0, 1.0, vector[2]],
-            [0.0, 0.0, 0.0, 1.0]
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [ -vector[0], vector[1], -vector[2], 1.0]
         ]};
         return Mat4D::mult4_d(self, translate_mat);
     }
@@ -81,4 +81,23 @@ impl Mat4D {
         }
         return result;
     }
+
+    pub fn _test() {
+        let a = Mat4D {content : [
+            [1.0,	 2.0,	 3.0,	 4.0],
+            [5.0,	 6.0,	 7.0,	 8.0],
+            [9.0,	10.0,	11.0,	12.0],
+           [13.0,	14.0,	15.0,	16.0]
+        ]};
+
+        let b = Mat4D {content : [
+            [2.0,	2.0,	2.0,	2.0],
+            [3.0,	3.0,	3.0,	3.0],
+            [4.0,	4.0,	4.0,	4.0],
+            [6.0,	5.0,	4.0,	3.0]
+        ]};
+
+        println!("{:?}", Mat4D::mult4_d(a, b).content);
+    } 
+
 }
