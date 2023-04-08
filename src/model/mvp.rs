@@ -63,7 +63,7 @@ impl Mat4D {
             [1.0, 0.0, 0.0, 0.0],
             [0.0, 1.0, 0.0, 0.0],
             [0.0, 0.0, 1.0, 0.0],
-            [ -vector[0], vector[1], -vector[2], 1.0]
+            [vector[0], vector[1], vector[2], 1.0]
         ]};
         return Mat4D::mult4_d(self, translate_mat);
     }
