@@ -16,10 +16,10 @@ fn main() {
     implement_vertex!(Vert3D, position, normal);
 
     // load file
-    let input = scene_loader::load_scene();
-    let mut buffers = Vec::new();
+    let input: Vec<(Vec<Vert3D>, Vec<u32>, Mat4D)> = scene_loader::load_scene();
 
     // extract data
+    let mut buffers: Vec<(VertexBuffer<Vert3D>, IndexBuffer<u32>, Mat4D)> = Vec::new();
     for (vertices, indices, model) in input {
         let v_buffer = VertexBuffer::new(&display, &vertices).unwrap();
         let i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
@@ -29,7 +29,6 @@ fn main() {
     // create glsl program
     let vs = std::fs::read_to_string("src\\shader\\simple_vertex.glsl").unwrap();
     let fs = std::fs::read_to_string("src\\shader\\normal_fragment.glsl").unwrap();
-
     let program = glium::Program::from_source(&display, &vs, &fs, None).unwrap();
 
     // uniforms and constants
