@@ -2,9 +2,8 @@ mod model;
 
 use glium::{glutin::{self, event::VirtualKeyCode}, Surface, Display, implement_vertex, VertexBuffer, IndexBuffer, uniform};
 use model::vertex::Vert3D;
-use russimp::scene::Scene;
 
-use crate::model::mvp::Mat4D;
+use crate::model::{mvp::Mat4D, scene_loader};
 
 fn main() {
     // Window and context creation
@@ -17,17 +16,19 @@ fn main() {
     implement_vertex!(Vert3D, position, normal);
 
     // load file
-    let input = Scene::from_file("res\\donut.obj", vec![]).unwrap();
+    let input: Vec<(Vec<Vert3D>, Vec<u32>, Mat4D)> = scene_loader::load_scene();
 
     // extract data
-    let (vertices, indices): (Vec<Vert3D>, Vec<u32>) = Vert3D::from_scene(input);
-    let v_buffer = VertexBuffer::new(&display, &vertices).unwrap();
-    let i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
+    let mut buffers: Vec<(VertexBuffer<Vert3D>, IndexBuffer<u32>, Mat4D)> = Vec::new();
+    for (vertices, indices, model) in input {
+        let v_buffer = VertexBuffer::new(&display, &vertices).unwrap();
+        let i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
+        buffers.push((v_buffer, i_buffer, model));
+    }
 
     // create glsl program
     let vs = std::fs::read_to_string("src\\shader\\simple_vertex.glsl").unwrap();
     let fs = std::fs::read_to_string("src\\shader\\normal_fragment.glsl").unwrap();
-
     let program = glium::Program::from_source(&display, &vs, &fs, None).unwrap();
 
     // uniforms and constants
@@ -35,8 +36,6 @@ fn main() {
     let mut pos = [0.0, 1.0, 1.0];
     let mut dir = [0.0, -1.0, -1.0];
     let up = [0.0, 1.0, 0.0];
-
-    let model = Mat4D::new().scale([0.5, 0.5, 0.5]);
 
     // projection code from : https://github.com/glium/glium/blob/master/book/tuto-10-perspective.md
     let projection = {
@@ -64,8 +63,8 @@ fn main() {
         let view = Mat4D::view_matrix(&pos , &dir, &up);
 
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-
-        target.draw(&v_buffer, &i_buffer, &program, 
+        for (v_buffer, i_buffer, model) in &buffers {
+            target.draw(v_buffer, i_buffer, &program, 
             &uniform! {model : model.content, view : view.content, projection : projection, camera_position : pos},
             &glium::DrawParameters {
                 depth: glium::Depth {
@@ -75,7 +74,7 @@ fn main() {
                 },
                 .. Default::default()
             }).unwrap();
-        
+        }
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
         target.finish().unwrap();
