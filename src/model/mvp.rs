@@ -1,3 +1,5 @@
+use super::vertex;
+
 #[derive(Clone, Copy, Debug)]
 pub struct Mat4D {
     pub content : [[f32; 4]; 4]
@@ -78,6 +80,20 @@ impl Mat4D {
                 }
                 result.content[i][j] = component;
             }
+        }
+        return result;
+    }
+
+    pub fn mult_mat_vec(matrix : Mat4D, vector : [f32; 3]) -> [f32; 3] {
+        let mut result = [0.0, 0.0, 0.0];
+        let homogen_vector = [vector[0], vector[1], vector[2], 1.0];
+        
+        for i in 0..3 {
+            let mut component = 0.0;
+            for k in 0..4 {
+                component += matrix.content[k][i] * homogen_vector[k];
+            }
+            result[i] = component;
         }
         return result;
     }
