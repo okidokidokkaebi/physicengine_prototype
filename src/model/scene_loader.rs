@@ -16,8 +16,7 @@ pub fn load_scene() -> Vec<SceneObject> {
         let input = russimp::scene::Scene::from_file(&("res\\".to_owned() + FILES[i]), vec![]).unwrap();
         let (vertices, indices) = from_scene(input);
         let model = Mat4D::new().trans(TRANSLATES[i]).scale([SCALES[i], SCALES[i], SCALES[i]]);
-
-        let (min, max) = calculate_aabb(&vertices, (SCALES[i], SCALES[i], SCALES[i]));
+        let (min, max) = calculate_aabb(&vertices);
 
         scene.push(SceneObject {
             vertices : vertices,
@@ -29,30 +28,19 @@ pub fn load_scene() -> Vec<SceneObject> {
     return scene;
 }
 
-fn calculate_aabb(vertices: &Vec<Vert3D>, (scale_x, scale_y, scale_z): (f32, f32, f32)) -> ([f32; 3], [f32; 3]) {
+fn calculate_aabb(vertices: &Vec<Vert3D>) -> ([f32; 3], [f32; 3]) {
     let mut min = vertices.get(0).unwrap().position;
     let mut max = vertices.get(0).unwrap().position;
 
-    min[0] *= scale_x;
-    min[1] *= scale_y;
-    min[2] *= scale_z;
-
-    max[0] *= scale_x;
-    max[1] *= scale_y;
-    max[2] *= scale_z;
-
     for &v in vertices {
-        let [mut x, mut y, mut z] = v.position;
+        let [x, y, z] = v.position;
 
-        x *= scale_x;
         if x < min[0] { min[0] = x; }
         if x > max[0] { max[0] = x; }      
 
-        y *= scale_y;
         if y < min[1] { min[1] = y; }
         if y > max[1] { max[1] = y; }      
 
-        z *= scale_z;
         if z < min[2] { min[2] = z; }
         if z > max[2] { max[2] = z; }
     }
