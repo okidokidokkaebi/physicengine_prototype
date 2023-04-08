@@ -70,6 +70,8 @@ fn main() {
         ]
     };
 
+    let mut next_collision_check = std::time::Instant::now() + std::time::Duration::from_secs_f32(0.5);
+
     event_loop.run(move |ev, _, control_flow| {
 
         let mut target = display.draw();
@@ -106,9 +108,13 @@ fn main() {
             }).unwrap();
         
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-        
-        for scene_object in &scene_objects {
-            are_colliding(&scene_object, &player_object);
+        if next_collision_check <= std::time::Instant::now() {
+            for scene_object in &scene_objects {
+                if are_colliding(&scene_object, &player_object) {
+                    println!("Collision detected!\tTimestamp: {:?}", std::time::Instant::now());
+                }
+            }
+            next_collision_check += std::time::Duration::from_secs_f32(0.5);
         }
 
         target.finish().unwrap();
