@@ -30,7 +30,7 @@ impl Vert3D {
         return (vertices, indices.concat());
     }
 
-    pub fn from_debug() -> (Vec<Vert3D>, Vec<u32>) {
+    pub fn _from_debug() -> (Vec<Vert3D>, Vec<u32>) {
     	
         let vertices: Vec<Vert3D> = vec![
             Vert3D { position: [-1.0, -1.0, -1.0], normal: [-1.0, -1.0, -1.0] },
