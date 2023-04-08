@@ -1,3 +1,5 @@
+use super::vertex;
+
 #[derive(Clone, Copy, Debug)]
 pub struct Mat4D {
     pub content : [[f32; 4]; 4]
@@ -80,6 +82,10 @@ impl Mat4D {
             }
         }
         return result;
+    }
+
+    pub fn mult_mat_vec(matrix : Mat4D, vector : [f32; 3]) -> [f32; 3] {
+        todo!();
     }
 
     pub fn _test() {
