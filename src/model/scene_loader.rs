@@ -28,7 +28,7 @@ pub fn load_scene() -> Vec<SceneObject> {
     return scene;
 }
 
-fn calculate_aabb(vertices: &Vec<Vert3D>) -> ([f32; 3], [f32; 3]) {
+pub fn calculate_aabb(vertices: &Vec<Vert3D>) -> ([f32; 3], [f32; 3]) {
     let mut min = vertices.get(0).unwrap().position;
     let mut max = vertices.get(0).unwrap().position;
 

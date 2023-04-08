@@ -3,7 +3,7 @@ mod model;
 use glium::{glutin::{self, event::VirtualKeyCode}, Surface, Display, implement_vertex, VertexBuffer, IndexBuffer, uniform};
 use model::vertex::Vert3D;
 
-use crate::model::{mvp::Mat4D, scene_loader, scene_object::SceneObject};
+use crate::model::{mvp::Mat4D, scene_loader, scene_object::{SceneObject, are_colliding}};
 
 fn main() {
     // Window and context creation
@@ -16,20 +16,36 @@ fn main() {
     implement_vertex!(Vert3D, position, normal);
 
     // load file
-    let input: Vec<SceneObject> = scene_loader::load_scene();
+    let scene_objects: Vec<SceneObject> = scene_loader::load_scene();
 
     // extract data
     let mut buffers: Vec<(VertexBuffer<Vert3D>, IndexBuffer<u32>, Mat4D)> = Vec::new();
-    for object in input {
+    for object in &scene_objects {
         let v_buffer = VertexBuffer::new(&display, &object.vertices).unwrap();
         let i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &object.indices).unwrap();
         buffers.push((v_buffer, i_buffer, object.model));
     }
 
+    // load control object
+    let player_scene = russimp::scene::Scene::from_file(&("res\\cube.obj"), vec![]).unwrap();
+    let (player_vertices, player_indices) = scene_loader::from_scene(player_scene);
+    let player_model = Mat4D::new().scale([0.5, 0.5, 0.5]);
+    let mut player_object = SceneObject {
+        vertices : player_vertices.clone(),
+        indices : player_indices, 
+        model : player_model,
+        bounding_volume : scene_loader::calculate_aabb(&player_vertices)
+    };
+    
+    let player_v_buffer = VertexBuffer::new(&display, &player_object.vertices).unwrap();
+    let player_i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &player_object.indices).unwrap();
+
     // create glsl program
     let vs = std::fs::read_to_string("src\\shader\\simple_vertex.glsl").unwrap();
     let fs = std::fs::read_to_string("src\\shader\\normal_fragment.glsl").unwrap();
+    let p_fs = std::fs::read_to_string("src\\shader\\simple_fragment.glsl").unwrap();
     let program = glium::Program::from_source(&display, &vs, &fs, None).unwrap();
+    let player_program = glium::Program::from_source(&display, &vs, &p_fs, None).unwrap();
 
     // uniforms and constants
     let movement = 0.05f32;
@@ -62,7 +78,8 @@ fn main() {
 
         let view = Mat4D::view_matrix(&pos , &dir, &up);
 
-        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // Draw Scene
         for (v_buffer, i_buffer, model) in &buffers {
             target.draw(v_buffer, i_buffer, &program, 
             &uniform! {model : model.content, view : view.content, projection : projection, camera_position : pos},
@@ -75,7 +92,24 @@ fn main() {
                 .. Default::default()
             }).unwrap();
         }
+        
+        // Draw Player
+        target.draw(&player_v_buffer, &player_i_buffer, &player_program,
+            &uniform! {model : player_object.model.content, view : view.content, projection : projection, camera_position : pos},
+            &glium::DrawParameters {
+                depth: glium::Depth {
+                    test: glium::DepthTest::IfLess,
+                    write: true,
+                    .. Default::default()
+                },
+                .. Default::default()
+            }).unwrap();
+        
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+        
+        for scene_object in &scene_objects {
+            are_colliding(&scene_object, &player_object);
+        }
 
         target.finish().unwrap();
 
@@ -107,9 +141,15 @@ fn main() {
                             Some(VirtualKeyCode::K) => dir[1] -= &movement,
                             Some(VirtualKeyCode::I) => dir[1] += &movement,
 
+                            Some(VirtualKeyCode::Left)  => player_object.model = player_object.model.trans([movement, 0.0, 0.0]),
+                            Some(VirtualKeyCode::Right) => player_object.model = player_object.model.trans([-movement, 0.0, 0.0]),
+                            Some(VirtualKeyCode::Up)    => player_object.model = player_object.model.trans([0.0, 0.0, -movement]),
+                            Some(VirtualKeyCode::Down)  => player_object.model = player_object.model.trans([0.0, 0.0, movement]),
+
                             Some(VirtualKeyCode::Key0) => {
                                 pos = [0.0, 1.0, 1.0];
                                 dir = [0.0, -1.0, -1.0];
+                                player_object.model = Mat4D::new();
                             },
                             _ => return,
                         }
