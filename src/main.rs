@@ -3,7 +3,7 @@ mod model;
 use glium::{glutin::{self, event::VirtualKeyCode}, Surface, Display, implement_vertex, VertexBuffer, IndexBuffer, uniform};
 use model::vertex::Vert3D;
 
-use crate::model::{mvp::Mat4D, scene_loader};
+use crate::model::{mvp::Mat4D, scene_loader, scene_object::SceneObject};
 
 fn main() {
     // Window and context creation
@@ -16,14 +16,14 @@ fn main() {
     implement_vertex!(Vert3D, position, normal);
 
     // load file
-    let input: Vec<(Vec<Vert3D>, Vec<u32>, Mat4D)> = scene_loader::load_scene();
+    let input: Vec<SceneObject> = scene_loader::load_scene();
 
     // extract data
     let mut buffers: Vec<(VertexBuffer<Vert3D>, IndexBuffer<u32>, Mat4D)> = Vec::new();
-    for (vertices, indices, model) in input {
-        let v_buffer = VertexBuffer::new(&display, &vertices).unwrap();
-        let i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &indices).unwrap();
-        buffers.push((v_buffer, i_buffer, model));
+    for object in input {
+        let v_buffer = VertexBuffer::new(&display, &object.vertices).unwrap();
+        let i_buffer = IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList, &object.indices).unwrap();
+        buffers.push((v_buffer, i_buffer, object.model));
     }
 
     // create glsl program

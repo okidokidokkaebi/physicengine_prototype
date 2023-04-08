@@ -2,21 +2,26 @@ use std::iter;
 
 use russimp::scene::Scene;
 
-use super::{vertex::Vert3D, mvp::Mat4D};
+use super::{vertex::Vert3D, mvp::Mat4D, scene_object::SceneObject};
 
 const FILES: [&str; 2] = ["torus.obj", "plane.obj"];
 const TRANSLATES: [[f32; 3]; 2] = [[1.0, 1.0, 1.0], [0.0, 0.0, 0.0]];
 const SCALES: [f32; 2] = [0.5, 0.5];
 
-pub fn load_scene() -> Vec<(Vec<Vert3D>, Vec<u32>, Mat4D)> {
+pub fn load_scene() -> Vec<SceneObject> {
     assert!(FILES.len() == TRANSLATES.len());
 
-    let mut scene : Vec<(Vec<Vert3D>, Vec<u32>, Mat4D)> = Vec::new();
+    let mut scene = Vec::new();
     for i in 0..FILES.len() {
         let input = russimp::scene::Scene::from_file(&("res\\".to_owned() + FILES[i]), vec![]).unwrap();
         let (vertices, indices) = from_scene(input);
         let model = Mat4D::new().trans(TRANSLATES[i]).scale([SCALES[i], SCALES[i], SCALES[i]]);
-        scene.push((vertices, indices, model));
+        scene.push(SceneObject {
+            vertices : vertices,
+            indices : indices, 
+            model : model,
+            bounding_volume : ([0.0,0.0,0.0], [0.0, 0.0, 0.0])
+        });
     }
     return scene;
 }
