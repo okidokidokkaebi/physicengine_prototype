@@ -26,7 +26,7 @@ fn main() {
 
     // create glsl program
     let vs = std::fs::read_to_string("src\\shader\\simple_vertex.glsl").unwrap();
-    let fs = std::fs::read_to_string("src\\shader\\simple_fragment.glsl").unwrap();
+    let fs = std::fs::read_to_string("src\\shader\\normal_fragment.glsl").unwrap();
 
     let program = glium::Program::from_source(&display, &vs, &fs, None).unwrap();
 
