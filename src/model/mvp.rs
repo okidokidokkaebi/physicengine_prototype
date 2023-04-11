@@ -1,4 +1,3 @@
-use super::vertex;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Mat4D {
