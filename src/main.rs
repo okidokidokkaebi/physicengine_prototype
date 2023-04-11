@@ -53,6 +53,10 @@ fn main() {
     let mut dir = [0.0, -1.0, -1.0];
     let up = [0.0, 1.0, 0.0];
 
+    let colliding_color: [f32; 3] = [0.9, 0.0, 0.0];
+    let not_colliding_color : [f32; 3] = [0.0, 0.9, 0.1];
+    let mut current_color = colliding_color;
+
     // projection code from : https://github.com/glium/glium/blob/master/book/tuto-10-perspective.md
     let projection = {
         let (width, height) = display.get_framebuffer_dimensions();
@@ -94,10 +98,18 @@ fn main() {
                 .. Default::default()
             }).unwrap();
         }
+
+        if next_collision_check <= std::time::Instant::now() {
+            for scene_object in &scene_objects {
+                if are_colliding(&scene_object, &player_object) {current_color = colliding_color; break;} 
+                else {current_color = not_colliding_color};
+            }
+            next_collision_check += std::time::Duration::from_secs_f32(0.25);
+        }
         
         // Draw Player
         target.draw(&player_v_buffer, &player_i_buffer, &player_program,
-            &uniform! {model : player_object.model.content, view : view.content, projection : projection, camera_position : pos},
+            &uniform! {model : player_object.model.content, view : view.content, projection : projection, camera_position : pos, diffuse_input : current_color},
             &glium::DrawParameters {
                 depth: glium::Depth {
                     test: glium::DepthTest::IfLess,
@@ -108,14 +120,6 @@ fn main() {
             }).unwrap();
         
         // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-        if next_collision_check <= std::time::Instant::now() {
-            for scene_object in &scene_objects {
-                if are_colliding(&scene_object, &player_object) {
-                    println!("Collision detected!\tTimestamp: {:?}", std::time::Instant::now());
-                }
-            }
-            next_collision_check += std::time::Duration::from_secs_f32(0.5);
-        }
 
         target.finish().unwrap();
 
